@@ -1,0 +1,13 @@
+# Goのビルド成果物
+*.exe
+*.test
+*.out
+/app
+/main
+
+# モジュールキャッシュなど
+vendor/
+
+# IDEごとのファイル（VSCodeなど）
+.vscode/
+.idea/
