@@ -42,17 +42,19 @@ func getTodoById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(todos[todoID - 1])
 }
 
-// todo: タスクを更新する
+// タスクを更新する
 func update(w http.ResponseWriter, r *http.Request) {
-	todoID, err := mux.Vars(r)["id"]
+	params := mux.Vars(r)
+	id := params["id"]
+
 	var updatedTodo Todo
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&updatedTodo); err != nil {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
 	}
 
 	for i, todo := range todos {
-		if todo.ID == todoID {
+		if todo.ID == id {
 			todos[i].Title = updatedTodo.Title
 			todos[i].Done = updatedTodo.Done
 			json.NewEncoder(w).Encode(todos[i])
@@ -70,6 +72,7 @@ func main() {
 	r.HandleFunc("/get", getTodos).Methods("GET")
 	r.HandleFunc("/get/{id:[0-9]+}", getTodoById).Methods("GET")
 	r.HandleFunc("/create", createTodo).Methods("POST")
+	r.HandleFunc("/update/{id:[0-9]+}", update).Methods("PUT")
 
 	log.Println("Server running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
