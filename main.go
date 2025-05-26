@@ -43,6 +43,26 @@ func getTodoById(w http.ResponseWriter, r *http.Request) {
 }
 
 // todo: タスクを更新する
+func update(w http.ResponseWriter, r *http.Request) {
+	todoID, err := mux.Vars(r)["id"]
+	var updatedTodo Todo
+	if err != nil {
+		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		return
+	}
+
+	for i, todo := range todos {
+		if todo.ID == todoID {
+			todos[i].Title = updatedTodo.Title
+			todos[i].Done = updatedTodo.Done
+			json.NewEncoder(w).Encode(todos[i])
+			return
+		}
+	}
+	http.Error(w, "Todo not found", http.StatusNotFound)
+}
+
+
 // todo: タスクを削除する
 
 func main() {
