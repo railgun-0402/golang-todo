@@ -65,7 +65,18 @@ func update(w http.ResponseWriter, r *http.Request) {
 }
 
 
-// todo: タスクを削除する
+// タスクを削除する
+func delete(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		return
+	}
+
+	// 「id」の要素を削除
+	todos = append(todos[:id-1], todos[id:]...)
+	json.NewEncoder(w).Encode(todos)
+}
 
 func main() {
 	r := mux.NewRouter()
@@ -73,6 +84,7 @@ func main() {
 	r.HandleFunc("/get/{id:[0-9]+}", getTodoById).Methods("GET")
 	r.HandleFunc("/create", createTodo).Methods("POST")
 	r.HandleFunc("/update/{id:[0-9]+}", update).Methods("PUT")
+	r.HandleFunc("/delete/{id:[0-9]+}", delete).Methods("DELETE")
 
 	log.Println("Server running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
