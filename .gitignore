@@ -4,6 +4,7 @@
 *.out
 /app
 /main
+.env
 
 # モジュールキャッシュなど
 vendor/
