@@ -5,31 +5,29 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"todo/models"
 
 	"github.com/gorilla/mux"
 )
 
-type Todo struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-	Done  bool   `json:"done"`
-}
-
-var todos []Todo
+var todos []models.Todo
 
 // タスク一覧を取得する
-func getTodos(w http.ResponseWriter, r *http.Request) {
+func getTodos(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(todos)
 }
 
 // タスクを登録する
-func createTodo(w http.ResponseWriter, r *http.Request) {
-	var todo Todo
+func createTodo(w http.ResponseWriter, req *http.Request) {
+	var todo models.Todo
 
 	// Requestの中身をTodoに変換し、JSON形式で返却
-	json.NewDecoder(r.Body).Decode(&todo)
+	if err := json.NewDecoder(req.Body).Decode(&todo); err != nil {
+		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
+	}
+
 	todos = append(todos, todo)
-	json.NewEncoder(w).Encode(todo)
+	json.NewEncoder(w).Encode(todo);
 }
 
 // タスクをidで取得する
@@ -43,12 +41,12 @@ func getTodoById(w http.ResponseWriter, r *http.Request) {
 }
 
 // タスクを更新する
-func update(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+func update(w http.ResponseWriter, req *http.Request) {
+	params := mux.Vars(req)
 	id := params["id"]
 
-	var updatedTodo Todo
-	if err := json.NewDecoder(r.Body).Decode(&updatedTodo); err != nil {
+	var updatedTodo models.Todo
+	if err := json.NewDecoder(req.Body).Decode(&updatedTodo); err != nil {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
 	}
@@ -66,8 +64,9 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 
 // タスクを削除する
-func delete(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(r)["id"])
+func delete(w http.ResponseWriter, req *http.Request) {
+
+	id, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
