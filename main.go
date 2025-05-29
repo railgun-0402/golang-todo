@@ -8,6 +8,69 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+func insertDB(db *sql.DB) {
+	todo := models.Todo {
+		ID: "3",
+		Title: "Third Task",
+		Done: false,
+	}
+
+	const sqlStr = `
+		insert into todos (id, title, done, created_at) values(?, ?, ?, now());
+	`
+
+	result, err := db.Exec(sqlStr, todo.ID, todo.Title, todo.Done)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(result.LastInsertId())
+	fmt.Println(result.RowsAffected())
+}
+
+func update(db *sql.DB) {
+	// トランザクション開始
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	id := 2
+	const sqlGetDone = `
+		select done
+		from todos
+		where id = ?;
+	`
+
+	row := tx.QueryRow(sqlGetDone, id)
+	if err := row.Err(); err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return
+	}
+
+	var done bool
+	err = row.Scan(&done)
+	if err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return
+	}
+
+	// タスクの完了を更新する
+	const sqlUpdate = `update todos set done = ? where id = ?`
+	_, err = tx.Exec(sqlUpdate, true, id)
+	if err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
+}
+
 func main() {
 	dbUser := "docker"
 	dbPassword := "docker"
@@ -20,30 +83,7 @@ func main() {
 	}
 	defer db.Close()
 
-	todoID := 1
-	const sqlStr = `
-		select * from todos where id = ?;
-	`
-
-	row := db.QueryRow(sqlStr, todoID)
-	if err := row.Err(); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	var todo models.Todo
-	var createdTime sql.NullTime
-
-	// todoArr := make([]models.Todo, 0)
-	err = row.Scan(&todo.ID, &todo.Title, &todo.Done, &createdTime)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	if createdTime.Valid {
-		todo.CreatedAt = createdTime.Time
-	}
+	update(db)
 
 	// for rows.Next() {
 	// 	var todo models.Todo
@@ -60,7 +100,6 @@ func main() {
 	// 		todoArr = append(todoArr, todo)
 	// 	}
 	// }
-	fmt.Printf("%+v\n", todo)
 
 
 	// r := mux.NewRouter()
