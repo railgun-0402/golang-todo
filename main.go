@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"todo/repositories"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -21,25 +20,6 @@ func main() {
 		fmt.Println(err)
 	}
 	defer db.Close()
-
-	repositories.SelectDetailTodo(db, 1)
-
-	// for rows.Next() {
-	// 	var todo models.Todo
-	// 	var createdTime sql.NullTime
-	// 	err := rows.Scan(&todo.ID, &todo.Title, &todo.Done, &createdTime)
-
-	// 	if createdTime.Valid {
-	// 		todo.CreatedAt = createdTime.Time
-	// 	}
-
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 	} else {
-	// 		todoArr = append(todoArr, todo)
-	// 	}
-	// }
-
 
 	// r := mux.NewRouter()
 
