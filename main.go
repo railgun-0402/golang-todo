@@ -3,73 +3,12 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"todo/models"
+	"todo/repositories"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func insertDB(db *sql.DB) {
-	todo := models.Todo {
-		ID: "3",
-		Title: "Third Task",
-		Done: false,
-	}
 
-	const sqlStr = `
-		insert into todos (id, title, done, created_at) values(?, ?, ?, now());
-	`
-
-	result, err := db.Exec(sqlStr, todo.ID, todo.Title, todo.Done)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println(result.LastInsertId())
-	fmt.Println(result.RowsAffected())
-}
-
-func update(db *sql.DB) {
-	// トランザクション開始
-	tx, err := db.Begin()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	id := 2
-	const sqlGetDone = `
-		select done
-		from todos
-		where id = ?;
-	`
-
-	row := tx.QueryRow(sqlGetDone, id)
-	if err := row.Err(); err != nil {
-		fmt.Println(err)
-		tx.Rollback()
-		return
-	}
-
-	var done bool
-	err = row.Scan(&done)
-	if err != nil {
-		fmt.Println(err)
-		tx.Rollback()
-		return
-	}
-
-	// タスクの完了を更新する
-	const sqlUpdate = `update todos set done = ? where id = ?`
-	_, err = tx.Exec(sqlUpdate, true, id)
-	if err != nil {
-		fmt.Println(err)
-		tx.Rollback()
-		return
-	}
-
-	tx.Commit()
-}
 
 func main() {
 	dbUser := "docker"
@@ -83,7 +22,7 @@ func main() {
 	}
 	defer db.Close()
 
-	update(db)
+	repositories.SelectDetailTodo(db, 1)
 
 	// for rows.Next() {
 	// 	var todo models.Todo
