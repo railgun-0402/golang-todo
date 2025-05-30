@@ -26,7 +26,7 @@ jobs:
 
       # TODO: Testを追加したら, go testを追加する
       - name: Test
-        run: go test
+        run: go test -v ./repositories
 
       - name: Vet
         run: go vet ./...
