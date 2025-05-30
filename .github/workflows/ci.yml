@@ -25,5 +25,8 @@ jobs:
         run: go build -v ./...
 
       # TODO: Testを追加したら, go testを追加する
+      - name: Test
+        run: go test
+
       - name: Vet
         run: go vet ./...
