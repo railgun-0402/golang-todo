@@ -88,7 +88,7 @@ func InsertTodo(db *sql.DB, todo models.Todo) (models.Todo, error) {
 	return todo, nil
 }
 
-// タスクを更新する
+// Todo: done以外も更新できるようにする
 func UpdateTodo(db *sql.DB, id int, done bool) error {
 
 	// タスクの完了を更新する
