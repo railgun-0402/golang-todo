@@ -11,14 +11,20 @@ import (
 
 var todos []models.Todo
 
+func enableCors(w http.ResponseWriter) {
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 // タスク一覧を取得する
 func GetTodos(w http.ResponseWriter, req *http.Request) {
+	enableCors(w)
 	json.NewEncoder(w).Encode(todos)
 }
 
 // タスクを登録する
 func CreateTodo(w http.ResponseWriter, req *http.Request) {
 	var todo models.Todo
+	enableCors(w)
 
 	// Requestの中身をTodoに変換し、JSON形式で返却
 	if err := json.NewDecoder(req.Body).Decode(&todo); err != nil {
@@ -43,6 +49,8 @@ func GetTodoById(w http.ResponseWriter, r *http.Request) {
 func Update(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	id := params["id"]
+
+	enableCors(w)
 
 	var updatedTodo models.Todo
 	if err := json.NewDecoder(req.Body).Decode(&updatedTodo); err != nil {
@@ -70,6 +78,7 @@ func Delete(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
 	}
+	enableCors(w)
 
 	// 「id」の要素を削除
 	todos = append(todos[:id-1], todos[id:]...)
