@@ -10,18 +10,25 @@ import (
 
 var testDB *sql.DB
 
-func setup() error {
-	fmt.Println("Start setup()")
+var (
+	dbUser = "docker"
+	dbPassword = "docker"
+	dbDatabase = "sampledb"
+	dbConn = fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+)
 
-	dbUser := "docker"
-	dbPassword := "docker"
-	dbDatabase := "sampledb"
-	dbConn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
-
+func connectDB() error {
 	var err error
 	testDB, err = sql.Open("mysql", dbConn)
 	if err != nil {
 		fmt.Println(err)
+	}
+	return nil
+}
+
+func setup() error {
+	if err := connectDB(); err != nil {
+		return err
 	}
 	return nil
 }

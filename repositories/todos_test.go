@@ -6,6 +6,7 @@ import (
 	"testing"
 	"todo/models"
 	"todo/repositories"
+	"todo/repositories/testdata"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
@@ -14,7 +15,7 @@ import (
 // SelectTodos関数のテスト
 func TestSelectTodos(t *testing.T) {
 
-	expectedNum := 3
+	expectedNum := len(testdata.SelectDetailTestData)
 	got, err := repositories.SelectTodos(testDB)
 	require.NoError(t, err)
 
@@ -31,19 +32,11 @@ func TestSelectDetailTodo(t *testing.T) {
 	}{
 		{
 			testTitle: "subtest1",
-			expected: models.Todo{
-				ID:    "1",
-				Title: "firstTodo",
-				Done:  false,
-			},
+			expected: testdata.SelectDetailTestData[0],
 		},
 		{
 			testTitle: "subtest2",
-			expected: models.Todo{
-				ID:    "2",
-				Title: "secondTodo",
-				Done:  true,
-			},
+			expected: testdata.SelectDetailTestData[1],
 		},
 	}
 
@@ -90,8 +83,41 @@ func TestInsertTodo(t *testing.T) {
 	t.Cleanup(func()  {
 		const sqlStr = `
 			delete from todos
-			where id = ? title = ? and done = ?
+			where id = ?
 		`
-		testDB.Exec(sqlStr, test.ID, test.Title, test.Done)
+		testDB.Exec(sqlStr, test.ID)
+	})
+}
+
+// UpdateTodo関数のテスト
+func TestUpdateTodo(t *testing.T) {
+
+	// テストデータを挿入
+	testData := models.Todo {
+		ID: "9999",
+		Title: "updateTodo",
+		Done: false,
+	}
+
+	_, err := testDB.Exec("INSERT INTO todos (id, title, done) VALUES(?, ?, ?)", testData.ID, testData.Title, testData.Done)
+	require.NoError(t, err)
+
+	// falseとtrueそれぞれに更新できることを確認する
+	err = repositories.UpdateTodo(testDB, 9999, true)
+	require.NoError(t, err)
+
+	// 結果を確認
+	var updatedDone bool
+	err = testDB.QueryRow("SELECT done FROM todos WHERE id = ?", testData.ID).Scan(&updatedDone)
+	require.NoError(t, err)
+	require.Equal(t, true, updatedDone)
+
+	// 後処理：追加したデータを必ず消す
+	t.Cleanup(func()  {
+		const sqlStr = `
+			delete from todos
+			where id = ?
+		`
+		testDB.Exec(sqlStr, testData.ID)
 	})
 }
