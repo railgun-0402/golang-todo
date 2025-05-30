@@ -41,6 +41,7 @@ jobs:
       - name: Build
         run: go build -v ./...
 
+      # github actions上で使用するデータの作成
       - name: Create todos table
         run: |
           sudo apt-get update && sudo apt-get install -y mysql-client
@@ -51,7 +52,6 @@ jobs:
           sudo apt-get update && sudo apt-get install -y mysql-client
           mysql -h 127.0.0.1 -u docker -pdocker sampledb < ./insertData.sql
 
-      # TODO: Testを追加したら, go testを追加する
       - name: Test
         env:
           DB_USER: docker
