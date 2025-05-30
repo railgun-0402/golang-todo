@@ -11,6 +11,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sampledb
+          MYSQL_USER: docker
+          MYSQL_PASSWORD: docker
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,6 +41,25 @@ jobs:
       - name: Build
         run: go build -v ./...
 
-      # TODO: Testを追加したら, go testを追加する
+      # github actions上で使用するデータの作成
+      - name: Create todos table
+        run: |
+          sudo apt-get update && sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -u docker -pdocker sampledb < ./createTable.sql
+
+      - name: Insert todos data
+        run: |
+          sudo apt-get update && sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -u docker -pdocker sampledb < ./insertData.sql
+
+      - name: Test
+        env:
+          DB_USER: docker
+          DB_PASSWORD: docker
+          DB_DATABASE: sampledb
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+        run: go test -v ./repositories
+
       - name: Vet
         run: go vet ./...
