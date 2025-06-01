@@ -11,19 +11,21 @@ type Todo = {
 export default function TodoPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
 
+  const apiUrl = "http://localhost:8080";
+
   // タスクを取得する
   useEffect(() => {
     fetchTodos();
   }, []);
 
   const fetchTodos = async () => {
-    const res = await fetch("http://localhost:8080/get");
+    const res = await fetch(apiUrl + "/get");
     const data = await res.json();
     setTodos(data);
   };
 
   const handleToggleCompleted = async (todo: Todo) => {
-    await fetch(`http://localhost:8080/update/${todo.id}`, {
+    await fetch(apiUrl + `/update/${todo.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
