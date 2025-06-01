@@ -52,6 +52,12 @@ jobs:
           mysql -h 127.0.0.1 -u docker -pdocker sampledb < ./insertData.sql
 
       - name: Test
+        env:
+          # DB設定
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: go test -v ./repositories
 
       - name: Vet
