@@ -3,6 +3,7 @@ package repositories_test
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -11,9 +12,9 @@ import (
 var testDB *sql.DB
 
 var (
-	dbUser = "docker"
-	dbPassword = "docker"
-	dbDatabase = "sampledb"
+	dbUser = os.Getenv("MYSQL_USER")
+	dbPassword = os.Getenv("MYSQL_PASSWORD")
+	dbDatabase = os.Getenv("MYSQL_DATABASE")
 	dbConn = fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
 )
 

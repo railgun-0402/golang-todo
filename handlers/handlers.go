@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"todo/models"
+	"todo/services"
 
 	"github.com/gorilla/mux"
 )
@@ -37,7 +38,14 @@ func GetTodoById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
 	}
-	json.NewEncoder(w).Encode(todos[todoID - 1])
+
+	todo, err := services.GetTodoByIdService(todoID)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(todo)
 }
 
 // タスクを更新する
