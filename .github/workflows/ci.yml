@@ -16,10 +16,13 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
+          # dockerfileで構築するDB設定
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.DB_NAME }}
           MYSQL_USER: ${{ secrets.DB_USER }}
           MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
         ports:
           - 3306:3306
         options: >-
@@ -42,23 +45,13 @@ jobs:
         run: go build -v ./...
 
       # github actions上で使用するデータの作成
-      - name: Create todos table
+      - name: Setup MySQL schema and seed data
         run: |
           sudo apt-get update && sudo apt-get install -y mysql-client
           mysql -h 127.0.0.1 -u docker -pdocker sampledb < ./createTable.sql
-
-      - name: Insert todos data
-        run: |
-          sudo apt-get update && sudo apt-get install -y mysql-client
           mysql -h 127.0.0.1 -u docker -pdocker sampledb < ./insertData.sql
 
       - name: Test
-        env:
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
         run: go test -v ./repositories
 
       - name: Vet
