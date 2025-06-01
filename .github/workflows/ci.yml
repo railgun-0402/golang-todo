@@ -1,12 +1,12 @@
-name: CI
+name: Backend CI
 
 on:
   push:
     branches:
       - main
   pull_request:
-    branches:
-      - "*"
+    paths-ignore:
+      - "next/**"
 
 jobs:
   build:

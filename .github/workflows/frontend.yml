@@ -2,8 +2,8 @@ name: Frontend CI
 
 on:
   push:
-    paths:
-      - "next/**"
+    branches:
+      - main
   pull_request:
     paths:
       - "next/**"
