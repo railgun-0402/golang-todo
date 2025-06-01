@@ -16,6 +16,10 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sampledb
+          MYSQL_USER: docker
+          MYSQL_PASSWORD: docker
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
