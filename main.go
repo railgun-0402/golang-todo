@@ -28,11 +28,11 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/get", handlers.GetTodos).Methods("GET")
-	r.HandleFunc("/get/{id:[0-9]+}", handlers.GetTodoById).Methods("GET")
-	r.HandleFunc("/create", handlers.CreateTodo).Methods("POST")
-	r.HandleFunc("/update/{id:[0-9]+}", handlers.Update).Methods("PUT")
-	r.HandleFunc("/delete/{id:[0-9]+}", handlers.Delete).Methods("DELETE")
+	r.HandleFunc("/get", handlers.GetTodosHandle).Methods("GET")
+	r.HandleFunc("/get/{id:[0-9]+}", handlers.GetTodoByIdHandle).Methods("GET")
+	r.HandleFunc("/create", handlers.CreateTodoHandle).Methods("POST")
+	r.HandleFunc("/update/{id:[0-9]+}", handlers.UpdateHandle).Methods("PUT")
+	r.HandleFunc("/delete/{id:[0-9]+}", handlers.DeleteHandle).Methods("DELETE")
 
 	handler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
