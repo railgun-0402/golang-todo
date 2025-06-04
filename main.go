@@ -5,34 +5,28 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"todo/handlers"
+	"os"
+	"todo/api"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
-
+var (
+	dbUser = os.Getenv("MYSQL_USER")
+	dbPassword = os.Getenv("MYSQL_PASSWORD")
+	dbDatabase = os.Getenv("MYSQL_DATABASE")
+	dbConn = fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+)
 
 func main() {
-	dbUser := "docker"
-	dbPassword := "docker"
-	dbDatabase := "sampledb"
-	dbConn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
-
 	db, err := sql.Open("mysql", dbConn)
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer db.Close()
 
-	r := mux.NewRouter()
-
-	r.HandleFunc("/get", handlers.GetTodosHandle).Methods("GET")
-	r.HandleFunc("/get/{id:[0-9]+}", handlers.GetTodoByIdHandle).Methods("GET")
-	r.HandleFunc("/create", handlers.CreateTodoHandle).Methods("POST")
-	r.HandleFunc("/update/{id:[0-9]+}", handlers.UpdateHandle).Methods("PUT")
-	r.HandleFunc("/delete/{id:[0-9]+}", handlers.DeleteHandle).Methods("DELETE")
+	// router層からハンドラの関係付けをする
+	r := api.NewRouter(db)
 
 	handler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},

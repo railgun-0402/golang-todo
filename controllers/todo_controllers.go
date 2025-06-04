@@ -1,21 +1,30 @@
-package handlers
+package controllers
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"todo/controllers/services"
 	"todo/models"
-	"todo/services"
 
 	"github.com/gorilla/mux"
 )
 
+// Controller構造体
+type TodoController struct {
+	service services.TodoAppServicer
+}
+
+// コンストラクタ
+func NewTodoController(s services.TodoAppServicer) *TodoController {
+	return &TodoController{service: s}
+}
+
 var todos []models.Todo
 
-
 // タスク一覧を取得する
-func GetTodosHandle(w http.ResponseWriter, req *http.Request) {
-	todos, err := services.GetTodosService()
+func (c *TodoController) GetTodos(w http.ResponseWriter, req *http.Request) {
+	todos, err := c.service.GetTodos()
 	if err != nil {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
@@ -24,7 +33,7 @@ func GetTodosHandle(w http.ResponseWriter, req *http.Request) {
 }
 
 // タスクを登録する
-func CreateTodoHandle(w http.ResponseWriter, req *http.Request) {
+func (c *TodoController) CreateTodo(w http.ResponseWriter, req *http.Request) {
 	var todo models.Todo
 
 	// Requestの中身をTodoに変換し、JSON形式で返却
@@ -32,7 +41,7 @@ func CreateTodoHandle(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	result, err := services.InsertService(todo)
+	result, err := c.service.Insert(todo)
 	if err != nil {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
@@ -41,14 +50,14 @@ func CreateTodoHandle(w http.ResponseWriter, req *http.Request) {
 }
 
 // タスクをidで取得する
-func GetTodoByIdHandle(w http.ResponseWriter, r *http.Request) {
+func (c *TodoController) GetTodoByIdHandle(w http.ResponseWriter, r *http.Request) {
 	todoID, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
 	}
 
-	todo, err := services.GetTodoByIdService(todoID)
+	todo, err := c.service.GetTodoById(todoID)
 	if err != nil {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
@@ -58,7 +67,7 @@ func GetTodoByIdHandle(w http.ResponseWriter, r *http.Request) {
 }
 
 // タスクを更新する
-func UpdateHandle(w http.ResponseWriter, req *http.Request) {
+func (c *TodoController) Update(w http.ResponseWriter, req *http.Request) {
 	todoID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
@@ -71,7 +80,7 @@ func UpdateHandle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = services.UpdateService(todoID, updatedTodo.Done)
+	err = c.service.Update(todoID, updatedTodo.Done)
 	if err != nil {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
@@ -81,7 +90,7 @@ func UpdateHandle(w http.ResponseWriter, req *http.Request) {
 
 // タスクを削除する
 // todo: Service層作るの忘れた
-func DeleteHandle(w http.ResponseWriter, req *http.Request) {
+func (c *TodoController) Delete(w http.ResponseWriter, req *http.Request) {
 
 	id, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
