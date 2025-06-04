@@ -7,6 +7,6 @@ type TodoService struct {
 	db *sql.DB
 }
 
-func NewMyAppService(db *sql.DB) *TodoService {
+func NewTodoService(db *sql.DB) *TodoService {
 	return &TodoService{db: db}
 }

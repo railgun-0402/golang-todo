@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"todo/controllers/services"
 	"todo/models"
-	"todo/services"
 
 	"github.com/gorilla/mux"
 )
 
 // Controller構造体
 type TodoController struct {
-	service *services.TodoService
+	service services.TodoAppServicer
 }
 
 // コンストラクタ
-func NewTodoController(s *services.TodoService) *TodoController {
+func NewTodoController(s services.TodoAppServicer) *TodoController {
 	return &TodoController{service: s}
 }
 

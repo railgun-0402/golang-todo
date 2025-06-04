@@ -6,9 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"todo/controllers"
-	"todo/routers"
-	"todo/services"
+	"todo/api"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/rs/cors"
@@ -27,11 +25,8 @@ func main() {
 		fmt.Println(err)
 	}
 
-	ser := services.NewMyAppService(db)
-	con := controllers.NewTodoController(ser)
-
 	// router層からハンドラの関係付けをする
-	r := routers.NewRouter(con)
+	r := api.NewRouter(db)
 
 	handler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
