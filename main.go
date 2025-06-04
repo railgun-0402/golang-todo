@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"os"
 	"todo/controllers"
+	"todo/routers"
 	"todo/services"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
@@ -30,13 +30,8 @@ func main() {
 	ser := services.NewMyAppService(db)
 	con := controllers.NewTodoController(ser)
 
-	r := mux.NewRouter()
-
-	r.HandleFunc("/get", con.GetTodos).Methods("GET")
-	r.HandleFunc("/get/{id:[0-9]+}", con.GetTodoByIdHandle).Methods("GET")
-	r.HandleFunc("/create", con.CreateTodo).Methods("POST")
-	r.HandleFunc("/update/{id:[0-9]+}", con.Update).Methods("PUT")
-	r.HandleFunc("/delete/{id:[0-9]+}", con.Delete).Methods("DELETE")
+	// router層からハンドラの関係付けをする
+	r := routers.NewRouter(con)
 
 	handler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
