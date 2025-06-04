@@ -5,34 +5,38 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"todo/handlers"
+	"os"
+	"todo/controllers"
+	"todo/services"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
-
+var (
+	dbUser = os.Getenv("MYSQL_USER")
+	dbPassword = os.Getenv("MYSQL_PASSWORD")
+	dbDatabase = os.Getenv("MYSQL_DATABASE")
+	dbConn = fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+)
 
 func main() {
-	dbUser := "docker"
-	dbPassword := "docker"
-	dbDatabase := "sampledb"
-	dbConn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
-
 	db, err := sql.Open("mysql", dbConn)
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer db.Close()
+
+	ser := services.NewMyAppService(db)
+	con := controllers.NewTodoController(ser)
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/get", handlers.GetTodosHandle).Methods("GET")
-	r.HandleFunc("/get/{id:[0-9]+}", handlers.GetTodoByIdHandle).Methods("GET")
-	r.HandleFunc("/create", handlers.CreateTodoHandle).Methods("POST")
-	r.HandleFunc("/update/{id:[0-9]+}", handlers.UpdateHandle).Methods("PUT")
-	r.HandleFunc("/delete/{id:[0-9]+}", handlers.DeleteHandle).Methods("DELETE")
+	r.HandleFunc("/get", con.GetTodos).Methods("GET")
+	r.HandleFunc("/get/{id:[0-9]+}", con.GetTodoByIdHandle).Methods("GET")
+	r.HandleFunc("/create", con.CreateTodo).Methods("POST")
+	r.HandleFunc("/update/{id:[0-9]+}", con.Update).Methods("PUT")
+	r.HandleFunc("/delete/{id:[0-9]+}", con.Delete).Methods("DELETE")
 
 	handler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},

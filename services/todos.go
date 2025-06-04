@@ -6,14 +6,8 @@ import (
 )
 
 // タスクを全て取得する
-func GetTodosService() ([]models.Todo, error) {
-	db, err := connectDB()
-	if err != nil {
-		return []models.Todo{}, err
-	}
-	defer db.Close()
-
-	todos, err := repositories.SelectTodos(db)
+func (s *TodoService) GetTodos() ([]models.Todo, error) {
+	todos, err := repositories.SelectTodos(s.db)
 	if err != nil {
 		return []models.Todo{}, err
 	}
@@ -23,15 +17,9 @@ func GetTodosService() ([]models.Todo, error) {
 
 
 // タスクをidで取得する
-func GetTodoByIdService(id int) (models.Todo, error) {
-	db, err := connectDB()
-	if err != nil {
-		return models.Todo{}, err
-	}
-	defer db.Close()
-
+func (s *TodoService) GetTodoById(id int) (models.Todo, error) {
 	// DBからIDに紐づくタスクを取得
-	todo, err := repositories.SelectDetailTodo(db, id)
+	todo, err := repositories.SelectDetailTodo(s.db, id)
 	if err != nil {
 		return models.Todo{}, err
 	}
@@ -40,14 +28,8 @@ func GetTodoByIdService(id int) (models.Todo, error) {
 }
 
 // タスクを追加するService関数
-func InsertService(todo models.Todo) (models.Todo, error) {
-	db, err := connectDB()
-	if err != nil {
-		return models.Todo{}, err
-	}
-	defer db.Close()
-
-	result, err := repositories.InsertTodo(db, todo)
+func (s *TodoService) Insert(todo models.Todo) (models.Todo, error) {
+	result, err := repositories.InsertTodo(s.db, todo)
 	if err != nil {
 		return models.Todo{}, err
 	}
@@ -55,14 +37,8 @@ func InsertService(todo models.Todo) (models.Todo, error) {
 }
 
 // タスクを更新するService関数
-func UpdateService(id int, done bool) (error) {
-	db, err := connectDB()
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	err = repositories.UpdateTodo(db, id, done)
+func (s *TodoService) Update(id int, done bool) (error) {
+	err := repositories.UpdateTodo(s.db, id, done)
 	if err != nil {
 		return err
 	}
