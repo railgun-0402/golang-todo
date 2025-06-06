@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"todo/apperrors"
 	"todo/controllers/services"
 	"todo/models"
 
@@ -38,7 +39,8 @@ func (c *TodoController) CreateTodo(w http.ResponseWriter, req *http.Request) {
 
 	// Requestの中身をTodoに変換し、JSON形式で返却
 	if err := json.NewDecoder(req.Body).Decode(&todo); err != nil {
-		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
+		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	result, err := c.service.Insert(todo)
@@ -53,7 +55,8 @@ func (c *TodoController) CreateTodo(w http.ResponseWriter, req *http.Request) {
 func (c *TodoController) GetTodoByIdHandle(w http.ResponseWriter, r *http.Request) {
 	todoID, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
-		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -70,7 +73,8 @@ func (c *TodoController) GetTodoByIdHandle(w http.ResponseWriter, r *http.Reques
 func (c *TodoController) Update(w http.ResponseWriter, req *http.Request) {
 	todoID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -94,7 +98,8 @@ func (c *TodoController) Delete(w http.ResponseWriter, req *http.Request) {
 
 	id, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
