@@ -40,12 +40,12 @@ func (c *TodoController) CreateTodo(w http.ResponseWriter, req *http.Request) {
 	// Requestの中身をTodoに変換し、JSON形式で返却
 	if err := json.NewDecoder(req.Body).Decode(&todo); err != nil {
 		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		apperrors.ErrorHandler(w, req, err)
 	}
 
 	result, err := c.service.Insert(todo)
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 	json.NewEncoder(w).Encode(result);
