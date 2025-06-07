@@ -80,7 +80,7 @@ func (c *TodoController) Update(w http.ResponseWriter, req *http.Request) {
 
 	var updatedTodo models.Todo
 	if err := json.NewDecoder(req.Body).Decode(&updatedTodo); err != nil {
-		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

@@ -3,7 +3,7 @@ package apperrors
 type TodoAppError struct {
 	ErrCode // ErrCode型のフィールド
 	Message string
-	Err error // エラーチェーンのための内部エラー
+	Err error `json:"-"`
 }
 
 func (myErr *TodoAppError) Error() string {
