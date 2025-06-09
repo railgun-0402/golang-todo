@@ -27,16 +27,35 @@ func (s *TodoService) GetTodos() ([]models.Todo, error) {
 
 // タスクをidで取得する
 func (s *TodoService) GetTodoById(id int) (models.Todo, error) {
-	// DBからIDに紐づくタスクを取得
-	todo, err := repositories.SelectDetailTodo(s.db, id)
-	if err != nil {
+	var todo models.Todo
+	var todoErr error
+
+	type todoResult struct {
+		todo models.Todo
+		err error
+	}
+
+	todoChan := make(chan todoResult)
+	defer close(todoChan)
+
+	// go文の後に無名関数を定義し宣言する
+	go func(ch chan <- todoResult, db *sql.DB, id int) {
+		// DBからIDに紐づくタスクを取得
+		todo, err := repositories.SelectDetailTodo(s.db, id)
+		ch <- todoResult{todo: todo, err: err}
+	}(todoChan, s.db, id)
+
+	tr := <-todoChan
+	todo, todoErr = tr.todo, tr.err
+
+	if todoErr != nil {
 		// SELECTで取得失敗とデータ0件のエラーを分ける
-		if errors.Is(err, sql.ErrNoRows) {
-			err = apperrors.NAData.Wrap(err, "no data")
-			return models.Todo{}, err
+		if errors.Is(todoErr, sql.ErrNoRows) {
+			todoErr = apperrors.NAData.Wrap(todoErr, "no data")
+			return models.Todo{}, todoErr
 		}
-		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
-		return models.Todo{}, err
+		todoErr = apperrors.GetDataFailed.Wrap(todoErr, "fail to get data")
+		return models.Todo{}, todoErr
 	}
 
 	return todo, nil
