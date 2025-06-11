@@ -21,7 +21,6 @@ func NewTodoController(s services.TodoAppServicer) *TodoController {
 	return &TodoController{service: s}
 }
 
-var todos []models.Todo
 
 // タスク一覧を取得する
 func (c *TodoController) GetTodos(w http.ResponseWriter, req *http.Request) {
@@ -53,6 +52,7 @@ func (c *TodoController) CreateTodo(w http.ResponseWriter, req *http.Request) {
 
 // タスクをidで取得する
 func (c *TodoController) GetTodoByIdHandle(w http.ResponseWriter, r *http.Request) {
+	// Validate Check
 	todoID, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
@@ -71,6 +71,7 @@ func (c *TodoController) GetTodoByIdHandle(w http.ResponseWriter, r *http.Reques
 
 // タスクを更新する
 func (c *TodoController) Update(w http.ResponseWriter, req *http.Request) {
+	// Validate Check
 	todoID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
@@ -93,9 +94,9 @@ func (c *TodoController) Update(w http.ResponseWriter, req *http.Request) {
 }
 
 // タスクを削除する
-// todo: Service層作るの忘れた
 func (c *TodoController) Delete(w http.ResponseWriter, req *http.Request) {
 
+	// Validate Check
 	id, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
@@ -103,7 +104,11 @@ func (c *TodoController) Delete(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// 「id」の要素を削除
-	todos = append(todos[:id-1], todos[id:]...)
-	json.NewEncoder(w).Encode(todos)
+	err = c.service.Delete(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

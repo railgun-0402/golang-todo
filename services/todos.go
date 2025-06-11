@@ -84,3 +84,13 @@ func (s *TodoService) Update(id int, done bool) (error) {
 	}
 	return nil
 }
+
+// タスクを削除するService関数
+func (s *TodoService) Delete(id int) (error) {
+	err := repositories.DeleteTodo(s.db, id)
+	if err != nil {
+		err = apperrors.DeleteDataFailed.Wrap(err, "fail to delete data")
+		return err
+	}
+	return nil
+}

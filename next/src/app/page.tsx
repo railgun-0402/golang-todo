@@ -8,6 +8,7 @@ type Todo = {
   done: boolean;
 };
 
+// TODO: ECSの環境を作成次第変更
 const apiUrl = "http://localhost:8080";
 
 export default function TodoPage() {
@@ -64,6 +65,8 @@ export default function TodoPage() {
 
   // タスクの削除
   const handleDeleteTodo = async (todo: Todo) => {
+    console.log(todo);
+    console.log(todo.id);
     await fetch(apiUrl + `/delete/${todo.id}`, {
       method: "DELETE",
     });

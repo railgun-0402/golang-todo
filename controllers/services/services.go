@@ -10,4 +10,5 @@ type TodoAppServicer interface {
 	GetTodoById(id int) (models.Todo, error)
 	Insert(todo models.Todo) (models.Todo, error)
 	Update(id int, done bool) (error)
+	Delete(id int) (error)
 }
