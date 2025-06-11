@@ -101,3 +101,16 @@ func UpdateTodo(db *sql.DB, id int, done bool) error {
 
 	return nil
 }
+
+// /deleteに対応・idに紐づいたタスクを削除する
+func DeleteTodo(db *sql.DB, id int) error {
+	// タスクの完了を更新する
+	const sqlDelete = `delete from todos where id = ?`
+	_, err := db.Exec(sqlDelete, id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}

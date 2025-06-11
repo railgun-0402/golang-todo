@@ -2,6 +2,7 @@
 package repositories_test
 
 import (
+	"database/sql"
 	"strconv"
 	"testing"
 	"todo/models"
@@ -120,4 +121,29 @@ func TestUpdateTodo(t *testing.T) {
 		`
 		testDB.Exec(sqlStr, testData.ID)
 	})
+}
+
+// DeleteTodo関数のテスト
+func TestDeleteTodo(t *testing.T) {
+	// テストデータを挿入
+	testData := models.Todo {
+		ID: "9999",
+		Title: "deleteTodo",
+		Done: false,
+	}
+
+	_, err := testDB.Exec("INSERT INTO todos (id, title, done) VALUES(?, ?, ?)", testData.ID, testData.Title, testData.Done)
+	require.NoError(t, err)
+
+	// idに紐づいたタスクを削除できるかを確認する
+	err = repositories.DeleteTodo(testDB, 9999)
+	require.NoError(t, err)
+
+	// 削除されたか確認：該当レコードがなくなっているか
+	var id, title string
+	var done bool
+	err = testDB.QueryRow("SELECT id, title, done FROM todos WHERE id = ?", testData.ID).Scan(&id, &title, &done)
+
+	require.Error(t, err)
+	require.Equal(t, sql.ErrNoRows, err)
 }
