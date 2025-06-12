@@ -54,8 +54,9 @@ export default function TodoPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        id: todo.id,
         title: todo.title,
-        completed: !todo.done,
+        done: !todo.done,
       }),
       mode: "cors",
     });
