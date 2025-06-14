@@ -33,8 +33,14 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 	 * 戻り値である http.Handler インターフェースを満たすようにしている
 	**/
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		traceID := newTraceID()
+
 		// 前処理：リクエスト情報をログ記録
-		log.Println(req.RequestURI, req.Method)
+		log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
+
+		// リクエストに含まれるコンテキストに、トレースIDを付加
+		ctx := SetTraceID(req.Context(), traceID)
+		req = req.WithContext(ctx)
 
 		// 返り値なしの ServeHTTP の中でどうレスポンスが作られたのかはわからない
 		// →そこで自作ResponseWriter
@@ -43,6 +49,6 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(rlw, req)
 
 		// 後処理：自作 ResponseWriter からロギングしたいデータを出す
-		log.Println("res:", rlw.code)
+		log.Printf("[%d]res: %d", traceID, rlw.code)
 	})
 }

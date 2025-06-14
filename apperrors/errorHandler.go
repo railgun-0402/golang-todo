@@ -3,7 +3,9 @@ package apperrors
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
+	"todo/api/middlewares"
 )
 
 // エラーが発生した時のレスポンス処理を一括実施
@@ -17,6 +19,11 @@ func ErrorHandler(w http.ResponseWriter, req *http.Request, err error) {
 			Err: err,
 		}
 	}
+
+	// Todo: middlewareが動かないとハンドラが動かなくなってしまう
+	// エラーと一緒にトレースIDをログ出力
+	traceID := middlewares.GetTraceID(req.Context())
+	log.Printf("[%d]error: %s\n", traceID, appErr)
 
 	var statusCode int
 
