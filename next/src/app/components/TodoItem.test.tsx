@@ -4,6 +4,9 @@ import { TodoItem } from "./TodoItem";
 import { Todo } from "../types/todo";
 import "@testing-library/jest-dom";
 
+/**
+ * Test: TodoItemクラスのテストクラス
+ */
 describe("TodoItem", () => {
   const baseTodo: Todo = {
     id: 1,
