@@ -1,15 +1,16 @@
 package apperrors
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"todo/api/middlewares"
+
+	"github.com/labstack/echo/v4"
 )
 
 // エラーが発生した時のレスポンス処理を一括実施
-func ErrorHandler(w http.ResponseWriter, req *http.Request, err error) {
+func ErrorHandler(ctx echo.Context, err error) error {
 	// 受け取ったエラーを独自エラーへ変換
 	var appErr *TodoAppError
 	if !errors.As(err, &appErr) {
@@ -22,7 +23,7 @@ func ErrorHandler(w http.ResponseWriter, req *http.Request, err error) {
 
 	// Todo: middlewareが動かないとハンドラが動かなくなってしまう
 	// エラーと一緒にトレースIDをログ出力
-	traceID := middlewares.GetTraceID(req.Context())
+	traceID := middlewares.GetTraceID(ctx.Request().Context())
 	log.Printf("[%d]error: %s\n", traceID, appErr)
 
 	var statusCode int
@@ -36,6 +37,5 @@ func ErrorHandler(w http.ResponseWriter, req *http.Request, err error) {
 		statusCode = http.StatusInternalServerError
 	}
 
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(appErr)
+	return ctx.JSON(statusCode, appErr)
 }
