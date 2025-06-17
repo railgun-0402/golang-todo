@@ -8,7 +8,6 @@ import (
 	"todo/controllers/services"
 	"todo/models"
 
-	"github.com/gorilla/mux"
 	"github.com/labstack/echo/v4"
 )
 
@@ -54,7 +53,7 @@ func (c *TodoController) CreateTodo(ctx echo.Context) error {
 // タスクをidで取得する
 func (c *TodoController) GetTodoByIdHandle(ctx echo.Context) error {
 	// Validate Check
-	todoID, err := strconv.Atoi(mux.Vars(ctx.Request())["id"])
+	todoID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
 		return apperrors.ErrorHandler(ctx, err)
@@ -72,17 +71,15 @@ func (c *TodoController) GetTodoByIdHandle(ctx echo.Context) error {
 
 // タスクを更新する
 func (c *TodoController) Update(ctx echo.Context) error {
-	req := ctx.Request()
-
 	// Validate Check
-	todoID, err := strconv.Atoi(mux.Vars(req)["id"])
+	todoID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
 		apperrors.ErrorHandler(ctx, err)
 	}
 
 	var updatedTodo models.Todo
-	if err := json.NewDecoder(req.Body).Decode(&updatedTodo); err != nil {
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&updatedTodo); err != nil {
 		return apperrors.ErrorHandler(ctx, err)
 	}
 
@@ -99,7 +96,7 @@ func (c *TodoController) Update(ctx echo.Context) error {
 func (c *TodoController) Delete(ctx echo.Context) error {
 
 	// Validate Check
-	id, err := strconv.Atoi(mux.Vars(ctx.Request())["id"])
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
 		return apperrors.ErrorHandler(ctx, err)
