@@ -16,7 +16,8 @@ var (
 	dbUser = os.Getenv("MYSQL_USER")
 	dbPassword = os.Getenv("MYSQL_PASSWORD")
 	dbDatabase = os.Getenv("MYSQL_DATABASE")
-	dbConn = fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+	dbHost     = os.Getenv("MYSQL_HOST")
+	dbConn = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPassword, dbHost, dbDatabase)
 )
 
 func main() {
