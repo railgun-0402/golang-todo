@@ -53,8 +53,8 @@ jobs:
       - name: Setup MySQL schema and seed data
         run: |
           sudo apt-get update && sudo apt-get install -y mysql-client
-          mysql -h 127.0.0.1 -u docker -pdocker sampledb < .sql//createTable.sql
-          mysql -h 127.0.0.1 -u docker -pdocker sampledb < .sql//insertData.sql
+          mysql -h 127.0.0.1 -u docker -pdocker sampledb < .sql/createTable.sql
+          mysql -h 127.0.0.1 -u docker -pdocker sampledb < .sql/insertData.sql
 
       - name: Test
         run: go test -v ./repositories
