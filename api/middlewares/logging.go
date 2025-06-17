@@ -3,6 +3,8 @@ package middlewares
 import (
 	"log"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 // 委譲によって、Header メソッド・Write メソッド・WriteHeader メソッドを持つ
@@ -26,29 +28,50 @@ func (rsw *resLoggingWriter) WriteHeader(code int) {
 }
 
 // リクエスト・レスポンス情報をロギング
-func LoggingMiddleware(next http.Handler) http.Handler {
-	/**
-	 * ハンドラ関数 func(w http.ResponseWriter, r *http.Request) を
-	 * http.HandlerFunc 型にキャストすることで
-	 * 戻り値である http.Handler インターフェースを満たすようにしている
-	**/
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+func LoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error  {
 		traceID := newTraceID()
+		req := ctx.Request()
 
 		// 前処理：リクエスト情報をログ記録
 		log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
 
 		// リクエストに含まれるコンテキストに、トレースIDを付加
-		ctx := SetTraceID(req.Context(), traceID)
-		req = req.WithContext(ctx)
+		newCtx := SetTraceID(req.Context(), traceID)
+		ctx.SetRequest(req.WithContext(newCtx))
 
-		// 返り値なしの ServeHTTP の中でどうレスポンスが作られたのかはわからない
-		// →そこで自作ResponseWriter
-		rlw := NewResLoggingWriter(w)
+		// ハンドラ実行
+		err := next(ctx)
 
-		next.ServeHTTP(rlw, req)
+		// 後処理:レスポンスステータスをログ出力
+		res := ctx.Response()
+		log.Printf("[%d]res: %d", traceID, res.Status)
 
-		// 後処理：自作 ResponseWriter からロギングしたいデータを出す
-		log.Printf("[%d]res: %d", traceID, rlw.code)
-	})
+		return err
+	}
+
+	// /**
+	//  * ハンドラ関数 func(w http.ResponseWriter, r *http.Request) を
+	//  * http.HandlerFunc 型にキャストすることで
+	//  * 戻り値である http.Handler インターフェースを満たすようにしている
+	// **/
+	// return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	// 	traceID := newTraceID()
+
+	// 	// 前処理：リクエスト情報をログ記録
+	// 	log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
+
+	// 	// リクエストに含まれるコンテキストに、トレースIDを付加
+	// 	ctx := SetTraceID(req.Context(), traceID)
+	// 	req = req.WithContext(ctx)
+
+	// 	// 返り値なしの ServeHTTP の中でどうレスポンスが作られたのかはわからない
+	// 	// →そこで自作ResponseWriter
+	// 	rlw := NewResLoggingWriter(w)
+
+	// 	next.ServeHTTP(rlw, req)
+
+	// 	// 後処理：自作 ResponseWriter からロギングしたいデータを出す
+	// 	log.Printf("[%d]res: %d", traceID, rlw.code)
+	// })
 }

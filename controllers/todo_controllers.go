@@ -8,7 +8,7 @@ import (
 	"todo/controllers/services"
 	"todo/models"
 
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 )
 
 // Controller構造体
@@ -23,92 +23,89 @@ func NewTodoController(s services.TodoAppServicer) *TodoController {
 
 
 // タスク一覧を取得する
-func (c *TodoController) GetTodos(w http.ResponseWriter, req *http.Request) {
+func (c *TodoController) GetTodos(ctx echo.Context) error {
 	todos, err := c.service.GetTodos()
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
-		return
+		return ctx.JSON(http.StatusInternalServerError, map[string]string {
+			"error": "fail internal exec",
+		})
 	}
-	json.NewEncoder(w).Encode(todos)
+	return ctx.JSON(http.StatusOK, todos)
 }
 
 // タスクを登録する
-func (c *TodoController) CreateTodo(w http.ResponseWriter, req *http.Request) {
+func (c *TodoController) CreateTodo(ctx echo.Context) error {
 	var todo models.Todo
 
 	// Requestの中身をTodoに変換し、JSON形式で返却
-	if err := json.NewDecoder(req.Body).Decode(&todo); err != nil {
+	if err := ctx.Bind(&todo); err != nil {
 		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
-		apperrors.ErrorHandler(w, req, err)
+		apperrors.ErrorHandler(ctx, err)
 	}
 
 	result, err := c.service.Insert(todo)
 	if err != nil {
-		apperrors.ErrorHandler(w, req, err)
-		return
+		return apperrors.ErrorHandler(ctx, err)
 	}
-	json.NewEncoder(w).Encode(result);
+	return ctx.JSON(http.StatusOK, result)
 }
 
 // タスクをidで取得する
-func (c *TodoController) GetTodoByIdHandle(w http.ResponseWriter, r *http.Request) {
+func (c *TodoController) GetTodoByIdHandle(ctx echo.Context) error {
 	// Validate Check
-	todoID, err := strconv.Atoi(mux.Vars(r)["id"])
+	todoID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return apperrors.ErrorHandler(ctx, err)
 	}
 
 	todo, err := c.service.GetTodoById(todoID)
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
-		return
+		return ctx.JSON(http.StatusInternalServerError, map[string]string {
+			"error": "fail internal exec",
+		})
 	}
 
-	json.NewEncoder(w).Encode(todo)
+	return ctx.JSON(http.StatusOK, todo)
 }
 
 // タスクを更新する
-func (c *TodoController) Update(w http.ResponseWriter, req *http.Request) {
+func (c *TodoController) Update(ctx echo.Context) error {
 	// Validate Check
-	todoID, err := strconv.Atoi(mux.Vars(req)["id"])
+	todoID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		apperrors.ErrorHandler(ctx, err)
 	}
 
 	var updatedTodo models.Todo
-	if err := json.NewDecoder(req.Body).Decode(&updatedTodo); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&updatedTodo); err != nil {
+		return apperrors.ErrorHandler(ctx, err)
 	}
 
 	err = c.service.Update(todoID, updatedTodo.Done)
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
-		return
+		return ctx.JSON(http.StatusInternalServerError, map[string]string {
+			"error": "fail internal exec",
+		})
 	}
-	json.NewEncoder(w).Encode(updatedTodo)
+	return ctx.JSON(http.StatusOK, updatedTodo)
 }
 
 // タスクを削除する
-func (c *TodoController) Delete(w http.ResponseWriter, req *http.Request) {
+func (c *TodoController) Delete(ctx echo.Context) error {
 
 	// Validate Check
-	id, err := strconv.Atoi(mux.Vars(req)["id"])
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		err = apperrors.BadParam.Wrap(err, "queryparam must be number")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return apperrors.ErrorHandler(ctx, err)
 	}
 
 	err = c.service.Delete(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return apperrors.ErrorHandler(ctx, err)
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	return ctx.NoContent(http.StatusNoContent)
 }

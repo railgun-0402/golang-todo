@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"todo/api"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/rs/cors"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
@@ -25,16 +25,30 @@ func main() {
 		fmt.Println(err)
 	}
 
-	// router層からハンドラの関係付けをする
-	r := api.NewRouter(db)
+	// Echoインスタンス作成
+	e := echo.New()
 
-	handler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
-        AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-        AllowedHeaders:   []string{"Content-Type"},
+	// router層からハンドラの関係付けをする
+	// r := api.NewRouter(db)
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig {
+		AllowOrigins:   []string{"http://localhost:3000"},
+        AllowMethods:   []string{echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS},
+        AllowHeaders:   []string{echo.HeaderContentType},
         AllowCredentials: true,
-	}).Handler(r)
+	}))
+
+	// handler := cors.New(cors.Options{
+	// 	AllowedOrigins:   []string{"http://localhost:3000"},
+    //     AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+    //     AllowedHeaders:   []string{"Content-Type"},
+    //     AllowCredentials: true,
+	// }).Handler(r)
+
+	// ルーティング登録
+	api.RegisterRoutes(e, db)
 
 	log.Println("Server running on :8080")
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	// log.Fatal(http.ListenAndServe(":8080", handler))
+	log.Fatal(e.Start(":8080"))
 }
