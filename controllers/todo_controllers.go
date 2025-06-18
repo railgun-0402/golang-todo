@@ -109,3 +109,8 @@ func (c *TodoController) Delete(ctx echo.Context) error {
 
 	return ctx.NoContent(http.StatusNoContent)
 }
+
+// ヘルスチェック用
+func (c *TodoController) HealthCheck(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, "OK")
+}

@@ -29,22 +29,12 @@ func main() {
 	// Echoインスタンス作成
 	e := echo.New()
 
-	// router層からハンドラの関係付けをする
-	// r := api.NewRouter(db)
-
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig {
 		AllowOrigins:   []string{"http://localhost:3000"},
         AllowMethods:   []string{echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS},
         AllowHeaders:   []string{echo.HeaderContentType},
         AllowCredentials: true,
 	}))
-
-	// handler := cors.New(cors.Options{
-	// 	AllowedOrigins:   []string{"http://localhost:3000"},
-    //     AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-    //     AllowedHeaders:   []string{"Content-Type"},
-    //     AllowCredentials: true,
-	// }).Handler(r)
 
 	// ルーティング登録
 	api.RegisterRoutes(e, db)
