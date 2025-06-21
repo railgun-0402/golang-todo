@@ -1,5 +1,7 @@
+ARG TARGETPLATFORM=linux/amd64
+
 # Build
-FROM --platform=linux/amd64 node:24-alpine AS builder
+FROM --platform=${TARGETPLATFORM} node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -10,7 +12,7 @@ COPY . .
 RUN npm run build
 
 # Production
-FROM --platform=linux/amd64 node:24-alpine AS runner
+FROM --platform=${TARGETPLATFORM} node:24-alpine AS runner
 
 WORKDIR /app
 
