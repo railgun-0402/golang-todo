@@ -29,6 +29,8 @@ describe("useTodos hook", () => {
       expect(result.current.todos).toEqual(mockTodos);
     });
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8080/get");
+    expect(fetch).toHaveBeenCalledWith(
+      process.env.NEXT_PUBLIC_API_BASE_URL + "/get"
+    );
   });
 });
