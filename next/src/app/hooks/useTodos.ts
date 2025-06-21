@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Todo } from "../types/todo";
 
-// TODO: ECSの環境を作成次第変更
-const apiUrl = "http://localhost:8080";
+// 本番用はECSの方で読み取る
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 /**
  * 状態管理のロジックをまとめる
