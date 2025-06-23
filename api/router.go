@@ -17,6 +17,8 @@ func RegisterRoutes(e *echo.Echo, db *sql.DB) {
 	// 共通のミドルウェア（EchoのLoggerミドルウェアでもOK）
 	e.Use(middleware.Logger())
 	e.Use(middlewares.LoggingMiddleware)
+	// 先順にすると、token検証失敗時にログが出なくなる
+	e.Use(middlewares.AuthMiddleware)
 
 	// ルーティング設定
 	e.GET("/get", todoCon.GetTodos)

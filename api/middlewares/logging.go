@@ -3,6 +3,7 @@ package middlewares
 import (
 	"log"
 	"net/http"
+	"todo/common"
 
 	"github.com/labstack/echo/v4"
 )
@@ -37,7 +38,7 @@ func LoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
 
 		// リクエストに含まれるコンテキストに、トレースIDを付加
-		newCtx := SetTraceID(req.Context(), traceID)
+		newCtx := common.SetTraceID(req.Context(), traceID)
 		ctx.SetRequest(req.WithContext(newCtx))
 
 		// ハンドラ実行

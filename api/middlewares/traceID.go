@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"context"
 	"sync"
 )
 
@@ -27,18 +26,3 @@ func newTraceID() int {
 	return no
 }
 
-// ContextにトレースIDを付加して返却
-func SetTraceID(ctx context.Context, traceID int) context.Context {
-	return context.WithValue(ctx, traceIDKey, traceID)
-}
-
-// トレースIDをContextから取り出す
-func GetTraceID(ctx context.Context) int {
-	id := ctx.Value(traceIDKey)
-
-	// Valueはany型が返却されるので、int型にassertion
-	if idInt, ok := id.(int); ok {
-		return idInt
-	}
-	return 0
-}
