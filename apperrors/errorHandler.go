@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"todo/api/middlewares"
+	"todo/common"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,7 +23,7 @@ func ErrorHandler(ctx echo.Context, err error) error {
 
 	// Todo: middlewareが動かないとハンドラが動かなくなってしまう
 	// エラーと一緒にトレースIDをログ出力
-	traceID := middlewares.GetTraceID(ctx.Request().Context())
+	traceID := common.GetTraceID(ctx.Request().Context())
 	log.Printf("[%d]error: %s\n", traceID, appErr)
 
 	var statusCode int
@@ -33,6 +33,8 @@ func ErrorHandler(ctx echo.Context, err error) error {
 		statusCode = http.StatusNotFound
 	case NoTargetData:
 		statusCode = http.StatusBadRequest
+	case RequiredAuthorizationHeader, Unauthorizated:
+		statusCode = http.StatusUnauthorized
 	default:
 		statusCode = http.StatusInternalServerError
 	}
