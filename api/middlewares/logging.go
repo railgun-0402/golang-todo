@@ -50,29 +50,35 @@ func LoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		return err
 	}
+}
 
-	// /**
-	//  * ハンドラ関数 func(w http.ResponseWriter, r *http.Request) を
-	//  * http.HandlerFunc 型にキャストすることで
-	//  * 戻り値である http.Handler インターフェースを満たすようにしている
-	// **/
-	// return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-	// 	traceID := newTraceID()
+/**
+  * ハンドラ関数 func(w http.ResponseWriter, r *http.Request) を
+  * http.HandlerFunc 型にキャストすることで
+  * 戻り値である http.Handler インターフェースを満たすようにしている
+**/
+func handler(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		traceID := newTraceID()
+		req := ctx.Request()
 
-	// 	// 前処理：リクエスト情報をログ記録
-	// 	log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
+		// 前処理：リクエスト情報をログ記録
+		log.Printf("[%d]%s %s\n", traceID, req.RequestURI, req.Method)
 
-	// 	// リクエストに含まれるコンテキストに、トレースIDを付加
-	// 	ctx := SetTraceID(req.Context(), traceID)
-	// 	req = req.WithContext(ctx)
+		// リクエストに含まれるコンテキストに、トレースIDを付加
+		newCtx := common.SetTraceID(req.Context(), traceID)
+		req = req.WithContext(newCtx)
 
-	// 	// 返り値なしの ServeHTTP の中でどうレスポンスが作られたのかはわからない
-	// 	// →そこで自作ResponseWriter
-	// 	rlw := NewResLoggingWriter(w)
+		// 返り値なしの ServeHTTP の中でどうレスポンスが作られたのかはわからない
+		// →そこで自作ResponseWriter
+		// rlw := NewResLoggingWriter(w)
 
-	// 	next.ServeHTTP(rlw, req)
+		err := next(ctx)
 
-	// 	// 後処理：自作 ResponseWriter からロギングしたいデータを出す
-	// 	log.Printf("[%d]res: %d", traceID, rlw.code)
-	// })
+		// 後処理：自作 ResponseWriter からロギングしたいデータを出す
+		// log.Printf("[%d]res: %d", traceID, rlw.code)
+		log.Printf("[%d]res: %d", traceID)
+
+		return err
+	}
 }
