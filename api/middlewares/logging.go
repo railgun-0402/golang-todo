@@ -77,7 +77,7 @@ func handler(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// 後処理：自作 ResponseWriter からロギングしたいデータを出す
 		// log.Printf("[%d]res: %d", traceID, rlw.code)
-		log.Printf("[%d]res: %d", traceID)
+		log.Printf("[%d]", traceID)
 
 		return err
 	}
